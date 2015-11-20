@@ -1,0 +1,19 @@
+#include "input.h"
+
+int readNextInt(FILE *fp){
+  int in = fgetc(fp);
+  int out = 0;
+  bool stopInt = false;
+  bool notStarted = true;
+  while(in!=-1 && !stopInt)
+    {
+      if(isdigit(in)){
+	notStarted=false;
+	out=10*out + (in-48);
+      }
+      if(!notStarted && !isdigit(in))
+	stopInt=true;
+      in = fgetc(fp);
+    }
+  return out;
+}

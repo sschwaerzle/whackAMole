@@ -1,18 +1,12 @@
-#include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 
-typedef struct queueElement{
-  unsigned short num;
-  struct queueElement * next;
-}queueElement;
+#include "queue.h"
 
-extern void enqueue(unsigned short number);
-extern unsigned short dequeue();
 extern int readNextInt(FILE *fp);
-extern void getNextConf(char whack, bool current[16], bool (*new)[16]);
+extern void getNextConf(char hit, bool current[16], bool (*new)[16]);
 extern unsigned short boolToShort(bool currentAr[16]);
 
-extern queueElement **qBack;
-extern queueElement **qFront;

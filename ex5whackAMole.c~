@@ -1,4 +1,5 @@
 #include "ex5.h"
+#include "queue.h"
 
 bool seen[65536];
 unsigned short parent[65536];
@@ -10,11 +11,7 @@ void printConf(bool a[16]);
 
 int main(void){
   FILE *fp = fopen("input.txt","r");
-  if(fp == NULL){
-    printf("No file found.\n");
-    for(;;);
-  }
-  
+
   qBack = (queueElement **)malloc(sizeof(queueElement **));
   qFront = (queueElement **)malloc(sizeof(queueElement **));
 
@@ -27,18 +24,17 @@ int main(void){
   bool found = false;
   unsigned short current = 1;
   unsigned short first;
-  for (i=0; i<16; i++) *(currentAr + i) = false;
-  nextInt=readNextInt(fp);
 
-  while (nextInt != 0){
-    printf("%d\t", nextInt);
+  nextInt=readNextInt(fp);
+  while(nextInt != 0){
     currentAr[nextInt-1] = true;
     nextInt = readNextInt(fp);
   }
   first=boolToShort(currentAr);
+  for (i=0; i<16; i++) *(currentAr + i) = false;
   parent[first] = first;
   hitPosition[first] = 0;
-  for (i=0; i<16;i++)
+  for(i=0; i<16;i++)
     conf[first][i] = currentAr[i];
 
   enqueue(first);
@@ -68,30 +64,14 @@ int main(void){
       }
     }
   }
-
   while(current != first){
     printf("%d\t",hitPosition[current]+1);
     current = parent[current];
-  }
+    }
   printf("\n");
 //  scanf("%d", &i);
   fclose(fp);
   return 0;
-}
-
-
-int readNextInt(FILE *fp){
-  int in = fgetc(fp);
-  int out = 0;
-  if(!isdigit(in)){
-    while(in != -1 && !isdigit(in))
-      in = fgetc(fp);
-  }
-  while(in != -1 && isdigit(in)){
-    out=10*out + (in-48);
-    in = fgetc(fp);
-  }
-  return out;
 }
 
 
