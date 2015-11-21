@@ -1,12 +1,12 @@
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <stdio.h>
+#include <unistd.h>
 
-#include "queue.h"
+#define HOLES 16
+#define MAXVAL 65536
 
-extern int readNextInt(FILE *fp);
-extern void getNextConf(char hit, bool current[16], bool (*new)[16]);
-extern unsigned short boolToShort(bool currentAr[16]);
-
+extern void enqueue(unsigned short number);
+extern unsigned short dequeue();

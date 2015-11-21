@@ -1,145 +1,169 @@
 #include "ex5.h"
 
-bool seen[65536];
-unsigned short parent[65536];
-char hitPosition[65536];
-bool conf[65536][16];
-//short chainLength[65536];
-void printConf(bool a[16]);
+// short chainLength[MAXVAL];
+// void printConf(bool a[HOLES]);
+int readNextInt(FILE *fp);
+void getNextConf(int hit, bool current[16], bool (*new)[16]);
+unsigned short boolToShort(bool currentAr[16]);
 
 
-int main(void){
-  FILE *fp = fopen("input.txt","r");
-  if(fp == NULL){
-    printf("No file found.\n");
-    for(;;);
-  }
-  
-  qBack = (queueElement **)malloc(sizeof(queueElement **));
-  qFront = (queueElement **)malloc(sizeof(queueElement **));
-
-  (*qBack) = NULL;
-  (*qFront)= NULL;
-
-  int nextInt;
-  bool currentAr[16];
-  int i, j, temp = 0;
-  bool found = false;
-  unsigned short current = 1;
-  unsigned short first;
-  for (i=0; i<16; i++) *(currentAr + i) = false;
-  nextInt=readNextInt(fp);
-
-  while (nextInt != 0){
-    printf("%d\t", nextInt);
-    currentAr[nextInt-1] = true;
-    nextInt = readNextInt(fp);
-  }
-  first=boolToShort(currentAr);
-  parent[first] = first;
-  hitPosition[first] = 0;
-  for (i=0; i<16;i++)
-    conf[first][i] = currentAr[i];
-
-  enqueue(first);
-  while (!found){
-    current = dequeue();
-    seen[current]=true;
-    found=true;
-    for (i = 0; i < 16; i++){
-      bool  new[16];
-      if (conf[current][i])
-      {
-	found=false;
-	getNextConf(i, conf[current], &new);
-	unsigned short newVal=0;
-	newVal = boolToShort(new);
-	if (!(seen[newVal]))
-	{
-	  //	  printf("queuing %d\n", newVal);
-	  parent[newVal] = current;
-	  hitPosition[newVal] = i;
-	  for (j = 0; j < 16; j++) 
-	    conf[newVal][j]  = new[j];
-	  enqueue(newVal);
-	  //	  printf("qBack: %p\n", (*qBack));
-	  //	  printf("qFront: %p\n", (*qFront) -> next -> num);
+int main(int argc, char *argv[]) {
+	
+	FILE *fp = fopen("input.txt","r");
+	if (fp == NULL) {
+		printf("No file found.\n");
+		while ((fp = fopen("input.txt","r")) == NULL )
+			sleep(3);
 	}
-      }
-    }
-  }
 
-  while(current != first){
-    printf("%d\t",hitPosition[current]+1);
-    current = parent[current];
-  }
-  printf("\n");
-//  scanf("%d", &i);
-  fclose(fp);
-  return 0;
+	int nextInt, i, j;
+	bool conf[MAXVAL][HOLES], currentAr[HOLES], seen[MAXVAL], found = false;
+	
+	for (i = 0; i < HOLES; i++)
+		currentAr[i] = false;
+
+	while((nextInt = readNextInt(fp)) != 0)
+		currentAr[nextInt-1] = true;
+		
+	unsigned short parent[MAXVAL], current = 1, first=boolToShort(currentAr);
+	
+	enqueue(first);
+	parent[first] = first;
+	
+	for(i = 0; i < HOLES; i++)
+		conf[first][i] = currentAr[i];
+
+	char whacked[MAXVAL];		
+	whacked[first] = 0;
+	
+	while (!found){
+		
+		current = dequeue();
+		seen[current] = true;
+		found = true;
+		
+		for (i = 0; i < HOLES; i++) {
+			
+			bool new[HOLES];
+			
+			if (conf[current][i]) {
+				
+				found = false;
+				getNextConf(i, conf[current], &new);
+				unsigned short newVal = 0;
+				newVal = boolToShort(new);
+				
+				if (!(seen[newVal])) {
+					
+					//	  printf("queuing %d\n", newVal);
+					parent[newVal] = current;
+					whacked[newVal] = i;
+				
+					for (j = 0; j < HOLES; j++) 
+						conf[newVal][j]  = new[j];
+						
+					enqueue(newVal);
+					
+				}
+				
+			}
+			
+		}
+		
+	}
+	
+	while(current != first)	{
+		
+		printf("%d\t",whacked[current]+1);
+		current = parent[current];
+	
+	}
+	
+	printf("\n");
+	//  scanf("%d", &i);
+	fclose(fp);
+	return 0;
+	
 }
 
 
-int readNextInt(FILE *fp){
-  int in = fgetc(fp);
-  int out = 0;
-  if(!isdigit(in)){
-    while(in != -1 && !isdigit(in))
-      in = fgetc(fp);
-  }
-  while(in != -1 && isdigit(in)){
-    out=10*out + (in-48);
-    in = fgetc(fp);
-  }
-  return out;
+int readNextInt(FILE *fp) {
+	
+	int in, out = 0;
+
+	for (in = fgetc(fp); !isdigit(in) && in != EOF ; in = fgetc(fp))
+		;
+
+	for ( ; isdigit(in); in = fgetc(fp))
+		out = 10*out + (in-'0');
+		
+	return out;
+	
 }
 
+void getNextConf(int hit, bool current[HOLES], bool (*new)[HOLES]) {
+	
+	int i;
+	
+	//printf("HITING AT %d\n", hit);
+	
+	for(i = 0; i < 16; i++) 
+		(*new)[i] = current[i];
+		
+	(*new)[hit] = !((*new)[hit]);
+	
+	if(hit >= 4)
+		(*new)[hit - 4]= !((*new)[hit - 4]);
+	if(hit <= 11)
+		(*new)[hit + 4]= !((*new)[hit + 4]);
+	if(hit % 4 != 0)
+		(*new)[hit - 1]= !((*new)[hit - 1]);
+	if(hit % 4 != 3)
+		(*new)[hit + 1]= !((*new)[hit + 1]);
 
-void getNextConf(char hit, bool current[16], bool (*new)[16]){
-  int i;
-  //printf("HITING AT %d\n", hit);
-  for(i = 0; i < 16; i++) 
-    (*new)[i] = current[i];
-  (*new)[hit] = !((*new)[hit]);
-  if(hit >= 4)
-    (*new)[hit - 4]= !((*new)[hit - 4]);
-  if(hit <= 11)
-    (*new)[hit + 4]= !((*new)[hit + 4]);
-  if(hit % 4 != 0)
-    (*new)[hit - 1]= !((*new)[hit - 1]);
-  if(hit % 4 != 3)
-    (*new)[hit + 1]= !((*new)[hit + 1]);
-
-  //  printConf(*new);
+	//  printConf(*new);
+	
 }
 
-unsigned short boolToShort(bool a[16]){
-  unsigned short retval=0;
-  int i;
-  for(i=15; i>=0; i--){
-    if(a[i])
-      retval++;
-    retval*=2;
-  }
-  return retval;
+unsigned short boolToShort(bool a[HOLES]) {
+	
+	unsigned short retval = 0;
+	int i;
+	
+	for(i = HOLES-1; i >= 0; i--)
+		retval = a[i] ? retval*2 + 2 : retval * 2;
+
+	return retval;
+	
 }
 
-void printConf(bool a[16]){
-  int i;
-  printf("\n");
-  for (i=0; i<16; i++){
-    if(a[i] == 1)
-      printf("%d\t", i);
-  }
-  printf("\n");
-  for (i=0; i<16; i++){
-    if (a[i] == 1)
-      printf("1");
-    else
-      printf("0");
-    if (i%4 == 3)
-      printf("\n");
-  }
-  printf("\n");
+/*
+void printConf(bool a[HOLES]) {
+	
+	int i;
+	
+	printf("\n");
+	
+	for (i = 0; i < HOLES; i++)
+		if(a[i] == 1)
+			printf("%d\t", i);
+	
+	printf("\n");
+	
+	for (i = 0; i < HOLES; i++) {
+		
+		if (a[i] == 1)
+			printf("1");
+		else
+			printf("0");
+			
+		if (i%4 == 3)
+			printf("\n");
+			
+	}
+	
+	printf("\n");
+
 }
+*/
 
