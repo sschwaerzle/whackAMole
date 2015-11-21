@@ -1,5 +1,14 @@
 #include "ex5.h"
 
+typedef struct queueElement{
+  unsigned short num;
+  struct queueElement * next;
+}queueElement;
+
+extern void enqueue(unsigned short number);
+extern unsigned short dequeue();
+
+
 queueElement **qBack = NULL;
 queueElement **qFront = NULL;
 
@@ -9,10 +18,10 @@ void enqueue(unsigned short number){
   new -> num = number;
   new -> next = NULL;
 
-  if ((*qBack) == NULL){
+  if ((*qBack) == NULL){ //Zero elements
     (*qBack) = new;
     (*qFront)= new;
-  } else {
+  } else { //More than zero elements
     (*qBack) -> next = new;
     (*qBack) = new;
   }
@@ -20,16 +29,15 @@ void enqueue(unsigned short number){
 
 unsigned short dequeue(){
   queueElement * ptr = (*qFront);
-  if ((*qFront) == NULL){
-    //    printf("queue underflow!\n");
+  if ((*qFront) == NULL){ //Queue underflow
     return 0;
   }
   unsigned short retval = (*qFront) -> num;
-  if((*qFront) -> next == NULL){
+  if((*qFront) -> next == NULL){ //One element
 	free(ptr);
 	(*qFront) = (*qBack) = NULL;
       }
-  else{
+  else{ //More than one element
     (*qFront) = (*qFront) -> next;
     free(ptr);
   }

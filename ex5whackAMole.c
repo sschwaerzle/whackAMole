@@ -1,11 +1,15 @@
-#include "ex5.h"
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
 
-bool seen[65536];
-unsigned short parent[65536];
-char hitPosition[65536];
-bool conf[65536][16];
-//short chainLength[65536];
+
+
 void printConf(bool a[16]);
+int readNextInt(FILE *fp);
+void getNextConf(char hit, bool current[16], bool (*new)[16]);
+unsigned short boolToShort(bool currentAr[16]);
 
 
 int main(void){
@@ -27,6 +31,12 @@ int main(void){
   bool found = false;
   unsigned short current = 1;
   unsigned short first;
+  bool seen[65536];
+  unsigned short parent[65536];
+  char hitPosition[65536];
+  bool conf[65536][16];
+
+
   for (i=0; i<16; i++) *(currentAr + i) = false;
   nextInt=readNextInt(fp);
 
@@ -35,13 +45,14 @@ int main(void){
     currentAr[nextInt-1] = true;
     nextInt = readNextInt(fp);
   }
+  
   first=boolToShort(currentAr);
   parent[first] = first;
   hitPosition[first] = 0;
   for (i=0; i<16;i++)
     conf[first][i] = currentAr[i];
 
-  enqueue(first);
+  enqueue(first); //start BFS
   while (!found){
     current = dequeue();
     seen[current]=true;
@@ -56,14 +67,11 @@ int main(void){
 	newVal = boolToShort(new);
 	if (!(seen[newVal]))
 	{
-	  //	  printf("queuing %d\n", newVal);
 	  parent[newVal] = current;
 	  hitPosition[newVal] = i;
 	  for (j = 0; j < 16; j++) 
 	    conf[newVal][j]  = new[j];
 	  enqueue(newVal);
-	  //	  printf("qBack: %p\n", (*qBack));
-	  //	  printf("qFront: %p\n", (*qFront) -> next -> num);
 	}
       }
     }
