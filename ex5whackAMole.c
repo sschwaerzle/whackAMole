@@ -15,11 +15,11 @@ unsigned short dequeue();
 
 typedef struct queueElement{
   unsigned short num;
-  struct queueElement * next;
+  struct queueElement *next;
 }queueElement;
 
-queueElement **qBack = NULL;
-queueElement **qFront = NULL;
+queueElement *qBack = NULL;
+queueElement *qFront = NULL;
 
 
 int main(void){
@@ -28,12 +28,6 @@ int main(void){
     printf("No file found.\n");
     for(;;);
   }
-  
-  qBack = (queueElement **)malloc(sizeof(queueElement **));
-  qFront = (queueElement **)malloc(sizeof(queueElement **));
-
-  (*qBack) = NULL;
-  (*qFront)= NULL;
 
   int nextInt;
   bool currentAr[16];
@@ -98,35 +92,30 @@ int main(void){
 
 
 void enqueue(unsigned short number){
-  queueElement * new = NULL;
-  new = (queueElement *)malloc(sizeof(queueElement *));
+  queueElement *new = malloc(sizeof(queueElement));
   new -> num = number;
   new -> next = NULL;
 
-  if ((*qBack) == NULL){ //Zero elements
-    (*qBack) = new;
-    (*qFront)= new;
+  if (qBack == NULL){ //Zero elements
+    qBack = new;
+    qFront= new;
   } else { //More than zero elements
-    (*qBack) -> next = new;
-    (*qBack) = new;
+    qBack -> next = new;
+    qBack = new;
   }
 }
 
 
 unsigned short dequeue(){
-  queueElement * ptr = (*qFront);
-  if ((*qFront) == NULL){ //Queue underflow
+  if (qFront == NULL) //Queue underflow
     return 0;
-  }
-  unsigned short retval = (*qFront) -> num;
-  if((*qFront) -> next == NULL){ //One element
-	free(ptr);
-	(*qFront) = (*qBack) = NULL;
-      }
-  else{ //More than one element
-    (*qFront) = (*qFront) -> next;
-    free(ptr);
-  }
+  queueElement *ptr = qFront;
+  unsigned short retval = qFront -> num;
+  if(qFront -> next == NULL) //One element
+	qFront = qBack = NULL;
+  else //More than one element
+    qFront = qFront -> next;
+  free(ptr);
   return retval;
 }
 
