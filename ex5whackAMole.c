@@ -42,12 +42,9 @@ int main(void){
 
 
   for (i=0; i<16; i++) *(currentAr + i) = false;
-  nextInt=readNextInt(fp);
-
-  while (nextInt != 0){
+  while((nextInt = readNextInt(fp)) != 0){
     printf("%d\t", nextInt);
     currentAr[nextInt-1] = true;
-    nextInt = readNextInt(fp);
   }
   
   first=boolToShort(currentAr);
@@ -122,16 +119,11 @@ unsigned short dequeue(){
 
 
 int readNextInt(FILE *fp){
-  int in = fgetc(fp);
-  int out = 0;
-  if(!isdigit(in)){
-    while(in != -1 && !isdigit(in))
-      in = fgetc(fp);
-  }
-  while(in != -1 && isdigit(in)){
-    out=10*out + (in-48);
-    in = fgetc(fp);
-  }
+  int in, out = 0;
+  for (in = fgetc(fp); !isdigit(in) && in != EOF ; in = fgetc(fp))
+    ;
+  for ( ; isdigit(in); in = fgetc(fp))
+    out = 10*out + (in-'0');
   return out;
 }
 
