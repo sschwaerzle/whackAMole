@@ -5,11 +5,21 @@
 #include <stdio.h>
 
 
-
 void printConf(bool a[16]);
 int readNextInt(FILE *fp);
 void getNextConf(char hit, bool current[16], bool (*new)[16]);
 unsigned short boolToShort(bool currentAr[16]);
+void enqueue(unsigned short number);
+unsigned short dequeue();
+
+
+typedef struct queueElement{
+  unsigned short num;
+  struct queueElement * next;
+}queueElement;
+
+queueElement **qBack = NULL;
+queueElement **qFront = NULL;
 
 
 int main(void){
@@ -82,10 +92,44 @@ int main(void){
     current = parent[current];
   }
   printf("\n");
-//  scanf("%d", &i);
   fclose(fp);
   return 0;
 }
+
+
+void enqueue(unsigned short number){
+  queueElement * new = NULL;
+  new = (queueElement *)malloc(sizeof(queueElement *));
+  new -> num = number;
+  new -> next = NULL;
+
+  if ((*qBack) == NULL){ //Zero elements
+    (*qBack) = new;
+    (*qFront)= new;
+  } else { //More than zero elements
+    (*qBack) -> next = new;
+    (*qBack) = new;
+  }
+}
+
+
+unsigned short dequeue(){
+  queueElement * ptr = (*qFront);
+  if ((*qFront) == NULL){ //Queue underflow
+    return 0;
+  }
+  unsigned short retval = (*qFront) -> num;
+  if((*qFront) -> next == NULL){ //One element
+	free(ptr);
+	(*qFront) = (*qBack) = NULL;
+      }
+  else{ //More than one element
+    (*qFront) = (*qFront) -> next;
+    free(ptr);
+  }
+  return retval;
+}
+
 
 
 int readNextInt(FILE *fp){
