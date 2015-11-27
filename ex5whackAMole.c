@@ -1,13 +1,13 @@
 #include "ex5.h"
 
-// short chainLength[MAXVAL];
+
 // void printConf(bool a[HOLES]);
 int readNextInt(FILE *fp);
-void getNextConf(int hit, bool current[16], bool (*new)[16]);
-unsigned short boolToShort(bool currentAr[16]);
-
+unsigned short getNextConf(int hit, unsigned short current);
 
 int main(int argc, char *argv[]) {
+
+	//---------------------- INITIALISATION PART ----------------------//
 	
 	FILE *fp = fopen("input.txt","r");
 	if (fp == NULL) {
@@ -16,57 +16,50 @@ int main(int argc, char *argv[]) {
 			sleep(3);
 	}
 
-	int nextInt, i, j;
-	bool conf[MAXVAL][HOLES], currentAr[HOLES], seen[MAXVAL], found = false;
-	
-	for (i = 0; i < HOLES; i++)
-		currentAr[i] = false;
-
-	while((nextInt = readNextInt(fp)) != 0)
-		currentAr[nextInt-1] = true;
+	int nextInt, i, whacked[MAXVAL];
+	unsigned short first = 0, parent[MAXVAL], current = 1;
+	bool seen[MAXVAL], found = false;
 		
-	unsigned short parent[MAXVAL], current = 1, first=boolToShort(currentAr);
-	
-	enqueue(first);
-	parent[first] = first;
-	
-	for(i = 0; i < HOLES; i++)
-		conf[first][i] = currentAr[i];
+	while((nextInt = readNextInt(fp)) != 0)
+		SET(first, nextInt);
 
-	char whacked[MAXVAL];		
+	parent[first] = first;
+
 	whacked[first] = 0;
-	
+
+	//------------------------ ALGORITHM PART ------------------------ //
+
+	enqueue(first);
 	while (!found){
 		
 		current = dequeue();
 		seen[current] = true;
 		found = true;
+		i=0;
 		
-		for (i = 0; i < HOLES; i++) {
-			
-			bool new[HOLES];
-			
-			if (conf[current][i]) {
-				
+		while(i < HOLES) {
+
+			if ((current >> i) & 1) {
+
 				found = false;
-				getNextConf(i, conf[current], &new);
-				unsigned short newVal = 0;
-				newVal = boolToShort(new);
+				i++;
+				unsigned short new = getNextConf(i, current);
 				
-				if (!(seen[newVal])) {
+				if (!(seen[new])) {
 					
 					//	  printf("queuing %d\n", newVal);
-					parent[newVal] = current;
-					whacked[newVal] = i;
-				
-					for (j = 0; j < HOLES; j++) 
-						conf[newVal][j]  = new[j];
+					parent[new] = current;
+					whacked[new] = i;
 						
-					enqueue(newVal);
+					enqueue(new);
 					
 				}
+
+				i--;
 				
 			}
+
+			i++;
 			
 		}
 		
@@ -74,7 +67,7 @@ int main(int argc, char *argv[]) {
 	
 	while(current != first)	{
 		
-		printf("%d\t",whacked[current]+1);
+		printf("%i\t", whacked[current]);
 		current = parent[current];
 	
 	}
@@ -86,7 +79,7 @@ int main(int argc, char *argv[]) {
 	
 }
 
-
+// readNextInt: Return next integer from input file
 int readNextInt(FILE *fp) {
 	
 	int in, out = 0;
@@ -101,69 +94,55 @@ int readNextInt(FILE *fp) {
 	
 }
 
-void getNextConf(int hit, bool current[HOLES], bool (*new)[HOLES]) {
-	
-	int i;
+// getNextConf: Store the result of hitting current[] at hit in new[] 
+unsigned short getNextConf(int hit, unsigned short current) {
 	
 	//printf("HITING AT %d\n", hit);
 	
-	for(i = 0; i < 16; i++) 
-		(*new)[i] = current[i];
-		
-	(*new)[hit] = !((*new)[hit]);
+	TOGGLE(current, hit);
 	
 	if(hit >= 4)
-		(*new)[hit - 4]= !((*new)[hit - 4]);
+		TOGGLE(current, (hit-4));
 	if(hit <= 11)
-		(*new)[hit + 4]= !((*new)[hit + 4]);
+		TOGGLE(current, (hit+4));
 	if(hit % 4 != 0)
-		(*new)[hit - 1]= !((*new)[hit - 1]);
+		TOGGLE(current, (hit-1));
 	if(hit % 4 != 3)
-		(*new)[hit + 1]= !((*new)[hit + 1]);
+		TOGGLE(current, (hit+1));
 
-	//  printConf(*new);
-	
-}
-
-unsigned short boolToShort(bool a[HOLES]) {
-	
-	unsigned short retval = 0;
-	int i;
-	
-	for(i = HOLES-1; i >= 0; i--)
-		retval = a[i] ? retval*2 + 2 : retval * 2;
-
-	return retval;
+	return current;
 	
 }
 
 /*
-void printConf(bool a[HOLES]) {
-	
-	int i;
-	
-	printf("\n");
-	
-	for (i = 0; i < HOLES; i++)
-		if(a[i] == 1)
-			printf("%d\t", i);
-	
-	printf("\n");
-	
-	for (i = 0; i < HOLES; i++) {
-		
-		if (a[i] == 1)
-			printf("1");
-		else
-			printf("0");
-			
-		if (i%4 == 3)
-			printf("\n");
-			
-	}
-	
-	printf("\n");
-
-}
-*/
+ * printConf: print current visibility of moles in a[]
+ * 
+ *void printConf(bool a[HOLES]) {
+ *	
+ *	int i;
+ *	
+ *	printf("\n");
+ *	
+ *	for (i = 0; i < HOLES; i++)
+ *		if(a[i] == 1)
+ *			printf("%d\t", i);
+ *	
+ *	printf("\n");
+ *	
+ *	for (i = 0; i < HOLES; i++) {
+ *		
+ *		if (a[i] == 1)
+ *			printf("1");
+ *		else
+ *			printf("0");
+ *			
+ *		if (i%4 == 3)
+ *			printf("\n");
+ *			
+ *	}
+ *	
+ *	printf("\n");
+ *
+ *}
+ */
 
