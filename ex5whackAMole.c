@@ -35,31 +35,25 @@ int main(int argc, char *argv[]) {
 		current = dequeue();
 		seen[current] = true;
 		found = true;
-		i=0;
 		
-		while(i < HOLES) {
+		for (i=0; i < HOLES; i++) {
 
 			if ((current >> i) & 1) {
 
 				found = false;
-				i++;
-				unsigned short new = getNextConf(i, current);
+				unsigned short new = getNextConf(i+1, current);
 				
 				if (!(seen[new])) {
 					
-					//	  printf("queuing %d\n", newVal);
+					// printf("queuing %d\n", new);
 					parent[new] = current;
-					whacked[new] = i;
+					whacked[new] = i+1;
 						
 					enqueue(new);
 					
 				}
-
-				i--;
 				
 			}
-
-			i++;
 			
 		}
 		
@@ -94,20 +88,20 @@ int readNextInt(FILE *fp) {
 	
 }
 
-// getNextConf: Store the result of hitting current[] at hit in new[] 
+// getNextConf: Return the result of hitting current at hit 
 unsigned short getNextConf(int hit, unsigned short current) {
 	
 	//printf("HITING AT %d\n", hit);
 	
 	TOGGLE(current, hit);
 	
-	if(hit >= 4)
+	if(hit > 4)
 		TOGGLE(current, (hit-4));
-	if(hit <= 11)
+	if(hit < 13)
 		TOGGLE(current, (hit+4));
-	if(hit % 4 != 0)
+	if(hit % 4 != 1)
 		TOGGLE(current, (hit-1));
-	if(hit % 4 != 3)
+	if(hit % 4 != 0)
 		TOGGLE(current, (hit+1));
 
 	return current;
